@@ -130,6 +130,8 @@ class SCPLParser(InputStream):
 				hexInt += ch
 				ch = self._getCh().lower()
 			self._putCh(ch)
+			if len(hexInt) == 1:
+				raise CompilerException("Missing hexadecimal constant")
 			return hexInt
 		#
 		#	control character. < > = and ! may be followed by an equals.
