@@ -105,7 +105,7 @@ class SCPLExtractor(object):
 
 class DummyDictionary(object):
 	def __init__(self):
-		self.dict = { "a":0x1000,"b":0x2000,"a.b":0x3000 }
+		self.dict = { "a":0x1000,"b":0x2000,"a.b":0x3000,"routine":0x8000 }
 	def find(self,word):
 		return self.dict[word] if word in self.dict else None
 

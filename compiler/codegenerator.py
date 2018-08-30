@@ -45,4 +45,27 @@ class TestCodeGenerator(object):
 	def loadIndirect(self,isByte):
 		print("{0:04x}   ldr r0,[{1}:r0]".format(self.addr,"BYTE" if isByte else "WORD"))
 		self.addr += 1
-
+	#
+	#	Store R0 directly.
+	#
+	def storeDirect(self,term):
+		print("{0:04x}   str r0,[${1:04x}]".format(self.addr,term.get()))
+		self.addr += 1
+	#
+	#	Save R0 to the index register or similar
+	#
+	def saveAddress(self):
+		print("{0:04x}   mov r0,rx".format(self.addr))
+		self.addr += 1
+	#
+	#	Store R0 indirectly through the index register
+	#
+	def storeIndirect(self,isByte):
+		print("{0:04x}   str r0,[{1}:x]".format(self.addr,"BYTE" if isByte else "WORD"))
+		self.addr += 1
+	#
+	#	Generate a call to the given address
+	#
+	def callRoutine(self,term):
+		print("{0:04x}   call ${1:04x}".format(self.addr,term.get()))
+		self.addr += 1
