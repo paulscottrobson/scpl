@@ -87,7 +87,7 @@ class SCPLExtractor(object):
 		#
 		# 	identifier address
 		#
-		if term == "&":
+		if term == "@":
 			t = self.get()
 			if not isinstance(t,VariableTerm):
 				raise CompilerException("Can only find address of identifier")
@@ -116,7 +116,7 @@ if __name__ == '__main__':
 	32766 15
 	'*' 'x'
 	-42
-	&a.b
+	@a.b
 	"Hello, World !"
 	""".split("\n")
 	tis = TextInputStream(txt)
