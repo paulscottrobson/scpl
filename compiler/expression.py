@@ -56,7 +56,11 @@ if __name__ == '__main__':
 	@a.b
 	a?4
 	a!4
-
+	a+0
+	a*1
+	a|0
+	a % 7
+	a % 16
 	""".split("\n")
 	tis = TextInputStream(txt)
 	parser = SCPLParser(tis)

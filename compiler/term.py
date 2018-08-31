@@ -100,14 +100,23 @@ class SCPLExtractor(object):
 
 		raise CompilerException("Cannot find term at {0}".format(term))
 
-
-
+# ****************************************************************************************
+#					  Dummy Dictionary Class for testing purposes
+# ****************************************************************************************
 
 class DummyDictionary(object):
 	def __init__(self):
 		self.dict = { "a":0x1000,"b":0x2000,"a.b":0x3000,"routine":0x8000 }
 	def find(self,word):
 		return self.dict[word] if word in self.dict else None
+	def add(self,name,addr,paramCount,isLocal,isVariable,moduleOnly):
+		if name in self.dict:
+			raise CompilerException("Duplicate dictionary item "+name)
+		self.dict[name] = addr
+	def endProcedure(self):
+		pass
+	def endModule(self):
+		pass
 
 if __name__ == '__main__':
 	txt = """

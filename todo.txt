@@ -1,0 +1,5 @@
+complete basic compiler
+write z80 code generator
+z80 optimisers +- 1,2,3 */ powers of 2
+write very basic run time
+get stuff working and expand runtime.

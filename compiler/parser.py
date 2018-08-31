@@ -45,7 +45,8 @@ class SCPLParser(InputStream):
 	#
 	def put(self,item):
 		assert self.putBuffer is None
-		self.putBuffer = item
+		if item != "":
+			self.putBuffer = item
 	#
 	#		Check the next item is the given item, throw error if it isn't.
 	#

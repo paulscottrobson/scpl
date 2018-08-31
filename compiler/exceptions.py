@@ -17,6 +17,7 @@ class CompilerException(Exception):
 	def __init__(self,msg):
 		Exception.__init__(self)
 		self.error = msg
+		print("Raised "+msg)
 	def getMessage(self):
 		return self.error
 
