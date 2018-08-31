@@ -97,13 +97,13 @@ class InstructionCompiler(object):
 
 		nextItem = self.parser.get() 										# what follows the identifier ?
 		if nextItem == "(":													# procedure call
-			paramCount = 0
+			paramCount = 0			
 			nextItem = self.parser.get()
 			if nextItem != ")":
 				self.parser.put(nextItem)
 				while nextItem != ")":
-					term = self.termExtractor.get()					
-					self.codeGenerator.loadTerm(paramCount,term)
+					term1 = self.termExtractor.get()					
+					self.codeGenerator.loadTerm(paramCount,term1)
 					paramCount += 1
 					if paramCount == 4:
 						raise CompilerException("Bad parameter")
@@ -128,7 +128,7 @@ class InstructionCompiler(object):
 		if nextItem != "=":													# must be an assignment
 			raise CompilerException("Missing = in assignment")
 		self.expressionCompiler.compileExpression()							# compile the value to assign
-		self.codeGenerator.storeDirect(term)								# and write it out
+		self.codeGenerator.storeDirect(term,0)								# and write it out
 		self.parser.checkNext(";")
 	#
 	#		Compile a condition with optional brackets

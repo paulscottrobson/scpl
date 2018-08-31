@@ -94,10 +94,10 @@ class TestCodeGenerator(CodeGenerator):
 		print("{0:04x}   ldr r0,[{1}:r0]".format(self.addr,"BYTE" if isByte else "WORD"))
 		self.addr += 1
 	#
-	#	Store R0 directly.
+	#	Store register directly.
 	#
-	def storeDirect(self,term):
-		print("{0:04x}   str r0,[${1:04x}]".format(self.addr,term.get()))
+	def storeDirect(self,term,register):
+		print("{0:04x}   str r{2},[${1:04x}]".format(self.addr,term.get(),register))
 		self.addr += 1
 	#
 	#	Save R0 to the index register or similar
@@ -142,4 +142,10 @@ class TestCodeGenerator(CodeGenerator):
 	#
 	def restore(self,register):
 		print("{0:04x}   pull r{1}".format(self.addr,register))
+		self.addr += 1
+	#
+	#	Compile return for end of procedure
+	#
+	def compileReturn(self):
+		print("{0:04x}   ret".format(self.addr))
 		self.addr += 1
