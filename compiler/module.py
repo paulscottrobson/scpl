@@ -16,6 +16,7 @@ from term import *
 from codegenerator import *
 from expression import *
 from instruction import *
+from dictionary import *
 
 # ****************************************************************************************
 # 									Instruction compiler
@@ -31,8 +32,6 @@ class ModuleCompiler(object):
 	#
 	def compileModule(self,parser):
 		self.parser = parser
-		self.termExtractor = SCPLExtractor(parser,self.dictionary)
-		self.expressionCompiler = ExpressionCompiler(parser,self.dictionary,self.codeGenerator)
 		self.instructionCompiler = InstructionCompiler(parser,self.dictionary,self.codeGenerator)
 
 		nextWord = self.parser.get()
@@ -47,6 +46,7 @@ class ModuleCompiler(object):
 		if word == "var":
 			self.instructionCompiler.compileVariableDefinition(False)
 			return
+
 		if word == "procedure":
 			isLocalToModule = False
 			procName = self.parser.get()
@@ -73,7 +73,6 @@ class ModuleCompiler(object):
 			self.instructionCompiler.compileInstruction()
 			self.codeGenerator.compileReturn()
 			self.dictionary.endProcedure()
-			print(self.dictionary.dict)
 			return
 
 		raise CompilerException("Syntax error")
@@ -81,16 +80,24 @@ class ModuleCompiler(object):
 if __name__ == '__main__':
 	txt = """
 		var aa;
+		var p1;
+		var p2;
+		var p3;
 		var bb[42];
 		var result;
 		procedure local test1(p1,p2,p3) { 
+			aa = 42;
 			var p4;
 			test1(@aa,bb);
 			p1!0 = p2+p3; 
 		}
+
+		procedure test2() {
+			test1('1',-2,"hello");
+		}
 	""".split("\n")
 	tis = TextInputStream(txt)
 	parser = SCPLParser(tis)
-	xc = ModuleCompiler(DummyDictionary(),TestCodeGenerator())
+	xc = ModuleCompiler(Dictionary(),TestCodeGenerator())
 	xc.compileModule(parser)
 		

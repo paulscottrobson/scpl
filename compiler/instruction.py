@@ -106,7 +106,7 @@ class InstructionCompiler(object):
 					self.codeGenerator.loadTerm(paramCount,term1)
 					paramCount += 1
 					if paramCount == 4:
-						raise CompilerException("Bad parameter")
+						raise CompilerException("Bad parameter count")
 					nextItem = self.parser.get()
 			if nextItem != ")":
 				raise CompilerException("Missing ) in procedure call")
