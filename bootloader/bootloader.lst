@@ -1,0 +1,287 @@
+              	; --------------------------------------
+              	; zasm: assemble "bootloader.asm"
+              	; date: 2018-11-04 08:52:47
+              	; --------------------------------------
+
+
+              	; ***************************************************************************************
+              	; ***************************************************************************************
+              	;
+              	;		Name : 		bootloader.asm
+              	;		Author :	Paul Robson (paul@robsons.org.uk)
+              	;		Date : 		21st October
+              	;		Purpose :	Boot-Loads code by loading "boot.img" into memory
+              	;					from $8000-$BFFF then banks 32-94 (2 per page) into $C000-$FFFF
+              	;
+              	;					Also provides write back facility through vectors at $7FFD (write to
+              	;	 				boot_save.img) and $7FFD (write expecting ASCIIZ filename in IX)
+              	;
+              	; ***************************************************************************************
+              	; ***************************************************************************************
+              	
+0020:         	FirstPage = 32 												; these are the pages for an 
+005F:         	LastPage = 95 												; unexpanded ZXNext
+              	
+3FE5:         			org 	$4000-27
+3FE5: 3F      			db 		$3F
+3FE6: 00000000			dw 		0,0,0,0,0,0,0,0,0,0,0
+3FEA: 00...   	
+              			org 	$4000-4
+3FFC: FE5A    			dw 		$5AFE
+3FFE: 01      			db 		1
+3FFF: 07      			db 		7
+4000: FFFFFFFF			org 	$5AFE
+4004: FF...   	
+5AFE: 007F    			dw 		$7F00	
+5B00: FFFFFFFF			org 	$7F00 							
+5B04: FF...   	
+              	
+7F00: 31FF7E  	Start:	ld 		sp,Start-1 									; set up the stack.
+              			;db 	$DD,$01
+              			if		defined(TESTRW)
+              			jp 		TestIOCopy 									; run test program ?
+              			endif
+7F03: DD21BD7F			ld 		ix,ImageName 								; read the image into memory
+7F07: CD277F  			call 	ReadNextMemory
+7F0A: C30080  			jp	 	$8000 										; run.
+              	
+              	; ***************************************************************************************
+              	;
+              	;		This test program loads in boot.img but writes out to boot_save.img
+              	;		So we can check the read/write works.
+              	;
+              	; ***************************************************************************************
+              	
+7F0D:         	TestIOCopy:
+              			;db 		$DD,$01
+7F0D: DD21BD7F			ld 		ix,ImageName 								; read in boot.img
+7F11: CD277F  			call 	ReadNextMemory
+7F14: DD21C67F			ld 		ix,ImageName2								; write out boot_save.img
+7F18: CD4B7F  			call 	WriteNextMemory
+7F1B: 3E02    			ld 		a,2 										; make border red to show success
+7F1D: D3FE    			out 	($FE),a
+7F1F: 18FE    	stop:	jr 		stop 
+              	
+              	; ***************************************************************************************
+              	;
+              	;								 Access the default drive
+              	;
+              	; ***************************************************************************************
+              	
+7F21:         	FindDefaultDrive:
+7F21: CF      			rst 	$08 										; set the default drive.
+7F22: 89      			db 		$89
+7F23: 32D47F  			ld 		(DefaultDrive),a
+7F26: C9      			ret
+              	
+              	; ***************************************************************************************
+              	;
+              	;			Read ZXNext memory from $8000-$BFFF then pages from $C000-$FFFF
+              	;
+              	; ***************************************************************************************
+              	
+7F27:         	ReadNextMemory:
+7F27: CD217F  			call 	FindDefaultDrive 							; get default drive
+7F2A: CD807F  			call 	OpenFileRead 								; open for reading
+7F2D: DD210080			ld 		ix,$8000 									; read in 8000-BFFF
+7F31: CD937F  			call 	Read16kBlock
+7F34: 0620    			ld 		b,FirstPage 								; current page
+7F36:         	__ReadBlockLoop:
+7F36: CD6F7F  			call 	SetPaging 									; access the pages
+7F39: DD2100C0			ld 		ix,$C000 									; read in C000-FFFF
+7F3D: CD937F  			call 	Read16kBlock 								; read it in
+7F40: 04      			inc 	b 											; there are two 8k blocks
+7F41: 04      			inc 	b 											; per page
+7F42: 78      			ld 		a,b
+7F43: FE60    			cp 		LastPage+1 									; until read in pages 32-95
+7F45: 20EF    			jr 		nz,__ReadBlockLoop
+7F47: CDB57F  			call 	CloseFile 									; close file.
+7F4A: C9      			ret
+              	
+              	; ***************************************************************************************
+              	;
+              	;			Write ZXNext memory from $8000-$BFFF then pages from $C000-$FFFF
+              	;
+              	; ***************************************************************************************
+              	
+7F4B:         	WriteNextMemory:
+7F4B: CD217F  			call 	FindDefaultDrive 							; get default drive
+7F4E: CD787F  			call 	OpenFileWrite 								; open for writing
+7F51: DD210080			ld 		ix,$8000  									; write $8000-$BFFF
+7F55: CDA47F  			call 	Write16kBlock
+7F58: 0620    			ld 		b,FirstPage
+7F5A:         	__WriteBlockLoop:
+7F5A: CD6F7F  			call 	SetPaging 									; select page
+7F5D: DD2100C0			ld 		ix,$C000 									; write block out
+7F61: CDA47F  			call 	Write16kBlock
+7F64: 04      			inc 	b 											; skip forward 2 blocks
+7F65: 04      			inc 	b
+7F66: 78      			ld 		a,b 										; until memory all written out.
+7F67: FE60    			cp 		LastPage+1
+7F69: 20EF    			jr 		nz,__WriteBlockLoop
+7F6B: CDB57F  			call 	CloseFile 									; close file
+7F6E: C9      			ret
+              	
+              	; ***************************************************************************************
+              	;
+              	;						   Map $C000-$FFFF onto blocks b and b+1
+              	;
+              	; ***************************************************************************************
+              	
+7F6F:         	SetPaging:
+7F6F: 78      			ld 		a,b 										; set $56
+7F70: ED9256  			db 		$ED,$92,$56
+7F73: 3C      			inc 	a 											; set $57
+7F74: ED9257  			db 		$ED,$92,$57
+7F77: C9      			ret
+              	
+              	
+              	; ***************************************************************************************
+              	;
+              	;									Open file write
+              	;
+              	; ***************************************************************************************
+              	
+7F78:         	OpenFileWrite:
+7F78: F5      			push 	af
+7F79: C5      			push 	bc
+7F7A: DDE5    			push 	ix
+7F7C: 060C    			ld 		b,12
+7F7E: 1806    			jr 		__OpenFile
+              	
+              	; ***************************************************************************************
+              	;
+              	;									Open file rea;
+              	; ***************************************************************************************
+              	
+7F80:         	OpenFileRead:
+7F80: F5      			push 	af
+7F81: C5      			push 	bc
+7F82: DDE5    			push 	ix
+7F84: 0601    			ld 		b,1
+7F86:         	__OpenFile:
+7F86: 3AD47F  			ld 		a,(DefaultDrive)
+7F89: CF      			rst 	$08
+7F8A: 9A      			db 		$9A
+7F8B: 32D57F  			ld 		(FileHandle),a 
+7F8E: DDE1    			pop 	ix
+7F90: C1      			pop 	bc
+7F91: F1      			pop 	af
+7F92: C9      			ret
+              	
+              	; ***************************************************************************************
+              	;
+              	;									Read 16k block
+              	;
+              	; ***************************************************************************************
+              	
+7F93:         	Read16kBlock:
+7F93: F5      			push 	af
+7F94: C5      			push 	bc
+7F95: DDE5    			push 	ix
+7F97: 3AD57F  			ld 		a,(FileHandle)
+7F9A: 010040  			ld 		bc,$4000
+7F9D: CF      			rst 	$08
+7F9E: 9D      			db 		$9D
+7F9F: DDE1    			pop 	ix
+7FA1: C1      			pop 	bc
+7FA2: F1      			pop 	af
+7FA3: C9      			ret
+              	
+              	; ***************************************************************************************
+              	;
+              	;									Write 16k block
+              	;
+              	; ***************************************************************************************
+              	
+7FA4:         	Write16kBlock:
+7FA4: F5      			push 	af
+7FA5: C5      			push 	bc
+7FA6: DDE5    			push 	ix
+7FA8: 3AD57F  			ld 		a,(FileHandle)
+7FAB: 010040  			ld 		bc,$4000
+7FAE: CF      			rst 	$08
+7FAF: 9E      			db 		$9E
+7FB0: DDE1    			pop 	ix
+7FB2: C1      			pop 	bc
+7FB3: F1      			pop 	af
+7FB4: C9      			ret
+              	
+              	; ***************************************************************************************
+              	;
+              	;										Close open file
+              	;
+              	; ***************************************************************************************
+              	
+7FB5:         	CloseFile:
+7FB5: F5      			push 	af
+7FB6: 3AD57F  			ld 		a,(FileHandle)
+7FB9: CF      			rst 	$08
+7FBA: 9B      			db 		$9B
+7FBB: F1      			pop 	af
+7FBC: C9      			ret		
+              	
+7FBD:         	ImageName:
+7FBD: 626F6F74			db 		"boot.img",0
+7FC1: 2E696D67	
+7FC5: 00      	
+7FC6:         	ImageName2:
+7FC6: 626F6F74			db 		"boot_save.img",0
+7FCA: 5F736176	
+7FCE: 652E696D	
+7FD2: 6700    	
+              	
+7FD4:         	DefaultDrive:
+7FD4: 00      			db 		0
+7FD5:         	FileHandle:
+7FD5: 00      			db 		0
+              	
+              	; ***************************************************************************************
+              	;
+              	;								 These functions live here
+              	;
+              	; ***************************************************************************************
+              	
+7FD6: FFFFFFFF			org 	$7FF9
+7FDA: FF...   	
+7FF9: DD21C67F			ld 		ix,ImageName2
+7FFD: C34B7F  			jp 		WriteNextMemory
+              	
+8000: FFFFFFFF			org 	$FFFF
+8004: FF...   	
+FFFF: 00      			db 		0
+
+
+; +++ segments +++
+
+#CODE          = $3FE5 = 16357,  size = $C01B = 49179
+
+; +++ global symbols +++
+
+CloseFile        = $7FB5 = 32693          bootloader.asm:207
+DefaultDrive     = $7FD4 = 32724          bootloader.asm:220
+FileHandle       = $7FD5 = 32725          bootloader.asm:222
+FindDefaultDrive = $7F21 = 32545          bootloader.asm:62
+FirstPage        = $0020 =    32          bootloader.asm:16
+ImageName        = $7FBD = 32701          bootloader.asm:215
+ImageName2       = $7FC6 = 32710          bootloader.asm:217
+LastPage         = $005F =    95          bootloader.asm:17
+OpenFileRead     = $7F80 = 32640          bootloader.asm:148
+OpenFileWrite    = $7F78 = 32632          bootloader.asm:136
+Read16kBlock     = $7F93 = 32659          bootloader.asm:169
+ReadNextMemory   = $7F27 = 32551          bootloader.asm:74
+SetPaging        = $7F6F = 32623          bootloader.asm:122
+Start            = $7F00 = 32512          bootloader.asm:30
+TestIOCopy       = $7F0D = 32525          bootloader.asm:46 (unused)
+Write16kBlock    = $7FA4 = 32676          bootloader.asm:188
+WriteNextMemory  = $7F4B = 32587          bootloader.asm:98
+__OpenFile       = $7F86 = 32646          bootloader.asm:153
+__ReadBlockLoop  = $7F36 = 32566          bootloader.asm:80
+__WriteBlockLoop = $7F5A = 32602          bootloader.asm:104
+_end             = $0000 = 65536          bootloader.asm:18 (unused)
+_size            = $C01B = 49179          bootloader.asm:18 (unused)
+stop             = $7F1F = 32543          bootloader.asm:54
+
+
+total time: 0.0009 sec.
+no errors
