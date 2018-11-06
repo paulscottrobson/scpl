@@ -3,7 +3,7 @@
 #
 #		Name:		exceptions.py
 #		Purpose:	SCPL Compiler Exception Class(es)
-#		Date:		29th August 2018
+#		Date:		6th November 2018
 #		Author:		Paul Robson (paul@robsons.org.uk)
 #
 # ****************************************************************************************
@@ -17,10 +17,15 @@ class CompilerException(Exception):
 	def __init__(self,msg):
 		Exception.__init__(self)
 		self.error = msg
-		print("Raised "+msg)
+		CompilerException.lineNumber = 0
+		CompilerException.sourceFile = "(Unknown)"
 	def getMessage(self):
-		return self.error
+		return "{0} in {1}:{2}".format(self.error,CompilerException.sourceFile,CompilerException.lineNumber)
 
 if __name__ == '__main__':
-	raise CompilerException("Hello world")
+	try:
+		raise CompilerException("Hello world")
+	except CompilerException as e:
+		print(e.getMessage())
+
 	
