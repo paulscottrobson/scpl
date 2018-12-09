@@ -1,15 +1,7 @@
-#CSpect V2.0.2 ZXSpectrum emulator by Mike Dailly
+CSpect V1.16 ZXSpectrum emulator by Mike Dailly
 (c)1998-2018 All rights reserved
 
 Be aware...emulator is far from well tested, might crash for any reason!
-
-NOTE: DISTRABUTION WITH COMMERCIAL TITLES IS NOT PERMITTED WITHOUT WRITTEN CONSENT.
-
-Installing
-----------
-Windows - You will need the latest .NET, and openAL ( https://www.openal.org/downloads/ )
-Linux   - You will need the full MONO  (on ubuntu do "apt-get install mono-devel" )
-OSX     - You will need the latest mono from https://www.mono-project.com/
 
 
 
@@ -25,50 +17,17 @@ Command Line Options
 -esc               =  to disable ESCAPE exit key (use exit opcode, close button or ALT+F4 to exit)
 -cur               =  to map cursor keys to 6789 (l/r/d/u)
 -8_3			   =  set filenames back to 8.3 detection
--mmc=<dir>\        =  enable RST $08 usage, must provide path to "root" dir of emulated SD card (eg  "-mmc=.\" or "-mmc=c:\test\")
--map=<path\file>   =  SNASM format map file for use in the debugger. format is: "<16bit address> <physical address> <type> <primary_label>[@<local>]"
+-mmc=<dir>\        =  enable RST $08 usage, must provide path to "root" dir of emulated SD card (eg  "-mmc=.\" or "-mmc="c:\test\")
+-map=<path\file>   =  SNASM format map file for use in the debugger. Local labels in the format "<primary>@<local>".
 -sound             =  disable sound
 -joy               =  disable joysticks
 -w<size>           =  set window size (1 to 4)
 -r                 =  Remember window settings (in "cspect.dat" file, just delete the file to reset)
--16bit             =  Use the logical (16bit) addresses in the debugger only
-
 
 
 
 Whats new
 ======================================================================================
-V2.0.2
-------
-Ported to C#, OpenTL, OpenGL and OpenAL, now fully cross platform!
-Things NOT yet finished/ported.
-   Gamepads
-   Some esxDOS functions  (F_FSTAT, F_STAT, M_GETDATE)
-   128K SNA files are not currently loading
-   File dialog (F2) will not work on OSX due to windows Forms not working in x64 mode in mono
-   Mouse is not currently implemented
-   Due to the way openAL appears to work, things aren't as smooth as i'd like. Disabling audio (-sound) will smooth out movement for now...
-   Probably a few more things....
-
-
-
-V1.18
------
-added "-16bit" to use only the logical address of the MAP file
-Execution Breakpoints are now set in physical address space. A HEX number or SHIFT+F9 will set a logical address breakpoint. This means you can now set breakpoints on code that is not banked in yet.
-Next mode enabled when loading a .NEX file
-
-
-V1.17
------
-ULA colours updated to match new core colours. Bright Magenta no longer transparent by default. Now matches with $E7 (not $E3)
-Fixed debugger bug where "0" is just left blank
-New MAP format allowing overlays mapped in. Labels in the debugger are now based on physical addresses depending on the MMU
-You can now specify a bank+offset in the debuggers memory view (M $00:$0000) to display physical addresses. 
-Numeric Keypad added for debugger use.
-EQUates are no longer displayed in the debugger, only addresses. This makes the view much cleaner
-
-
 V1.16
 -----
 Fixed sprite transparency to use the index before the palette and colour conversion is done
@@ -393,27 +352,26 @@ HEX/DEC mode can be toggled via "switches"
 
 Debugger Commands
 ======================================================================================
-M <address>         Set memory window base address (in normal 64k window)
-M <bank>:<offset>   Set memory window into physical memory using bank/offset
-G <address>         Goto address in disassembly window
-BR <address>        Toggle Breakpoint
-WRITE <address>     Toggle a WRITE access break point
-READ  <address>     Toggle a READ access break point (also when EXECUTED)
-PUSH <value>        push a 16 bit value onto the stack
-POP				    pop the top of the stack
-POKE <add>,<val>    Poke a value into memory
+M <address>     Set memory window base address
+G <address>     Goto address in disassembly window
+BR <address>    Toggle Breakpoint
+WRITE <address> Toggle a WRITE access break point
+READ  <address> Toggle a READ access break point (also when EXECUTED)
+PUSH <value>    push a 16 bit value onto the stack
+POP				pop the top of the stack
+POKE <add>,<val>Poke a value into memory
 Registers:
-   A  <value>       Set the A register
-   A' <value>       Set alternate A register
-   F  <value>       Set the Flags register
-   F' <value>       Set alternate Flags register
-   AF <value>       Set 16bit register pair value
-   AF'<value>       Set 16bit register pair value
+   A  <value>    Set the A register
+   A' <value>    Set alternate A register
+   F  <value>    Set the Flags register
+   F' <value>    Set alternate Flags register
+   AF <value>    Set 16bit register pair value
+   AF'<value>    Set 16bit register pair value
    |
    | same for all others
    |
-   SP <value>      Set the stack register
-   PC <value>      Set alternate program counter register
+   SP <value>    Set the stack register
+   PC <value>    Set alternate program counter register
 
 
 
@@ -645,3 +603,5 @@ Banks[...]						// Bank 5 is first (loaded to $4000), then bank 2 (to $8000) the
 (R/W) 0x4A (74) => Transparency colour fallback
   bits 7-0 = Set the 8 bit colour.
   (0 = black on reset on reset)
+
+
