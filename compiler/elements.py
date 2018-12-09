@@ -30,6 +30,8 @@ class ElementParser(object):
 			self.elementHeld = None
 			return element
 		ch = self.stream.get().lower()
+		if ch == " ":
+			return self.get()
 		#
 		#		Quoted string
 		#
@@ -83,7 +85,7 @@ class ElementParser(object):
 			ch = self.stream.get()
 			if ch != "'":
 				raise CompilerException("")
-			return "'"+char+"'"
+			return str(ord(char))
 		return ch	
 
 	#
@@ -97,7 +99,7 @@ if __name__ == "__main__":
 	tas = TextArrayStream("""
 		$7FFE
 		"hello" 123 var.ident_1 >+< 'x' // comment
-		"world"
+		"world" $2A
 	
 	""".split("\n"))
 
