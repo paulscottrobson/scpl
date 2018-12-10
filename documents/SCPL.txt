@@ -5,29 +5,30 @@ All values are 16 bits even if they might write 16 bit :)
 
 Terms (all numbers are treated as 16 bit unsigned integers)
 ===========================================================
-[-]Decimal Constant
+Decimal Constant
 $<hexadecimal constant>
-"<string constant>" (ASCIIZ)
+"<string constant>" (string constant)
 'c'	(character constant)
 @identifier (address constant)
 identifier (variable)
 identifier (constant)
+
+Any *constant* can be preceded by a '-' sign, even strings :)
 
 Expression (calculate using BC,HL)
 ==================================
 Sequence of alternating terms and operators.
 + - * / % 
 & | ^
-! ?
+!
 < = > #
+
 No precedence.
-Addresses are all byte addresses.
+Addresses are all byte addresses. However pling operates on words, e.g. a!4 = word at (a+8) a!b = word at (a+b+b)
 
 L-Expression (value stored in DE if not constant)
 =================================================
-!?<term>				[byte/word write]
-&<constant term> 		[port write]
-<identifier>!?<term> 	[byte/word write]
+<identifier>!<term> 	[word write]
 <identifier> 			[variable write]
 
 Statements
@@ -49,6 +50,10 @@ local <identifier> [is <type>]
 local <identifier>[<sane constant term>] [is <type>]
 global <identifier> [is <type>]
 global <identifier>[<sane constant term>] [is <type>]
+
+<sane constant term> is an amount of memory ; > 512 generates a warning ? this is the number of WORDS.
+variable will contain the address of the memory allocated.
+
 const <identifier> = <constant term> ;
 proc <identifier>(p1,p2,p3>) statement ; <identifier> 
 
