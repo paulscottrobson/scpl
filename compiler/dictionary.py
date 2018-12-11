@@ -76,7 +76,7 @@ class TestDictionary(Dictionary):
 		self.add(w)
 		self.add(VariableIdentifier("locvar",0x1234,False))
 		self.add(VariableIdentifier("glbvar",0x5678,True))
-		self.add(VariableIdentifier("const",0xABCD))
+		self.add(ConstantIdentifier("const1",0xABCD))
 
 
 if __name__ == "__main__":
@@ -90,5 +90,3 @@ if __name__ == "__main__":
 	td.purgeNonExternals()
 	print(td.toString())
 	print("3-----------------------------------------")
-
-w

@@ -20,7 +20,7 @@ Expression (calculate using BC,HL)
 Sequence of alternating terms and operators.
 + - * / % 
 & | ^
-!
+! ?
 < = > #
 
 No precedence.
@@ -29,6 +29,7 @@ Addresses are all byte addresses. However pling operates on words, e.g. a!4 = wo
 L-Expression (value stored in DE if not constant)
 =================================================
 <identifier>!<term> 	[word write]
+<identifier>?<term> 	[byte write]
 <identifier> 			[variable write]
 
 Statements

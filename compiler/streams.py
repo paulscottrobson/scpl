@@ -56,9 +56,11 @@ class TextArrayStream(Stream):
 		self.currentPos = 0
 		textArray = [x if x.find("//") < 0 else x[:x.find("//")] for x in textArray]
 		self.textArray = [x.strip()+" " for x in textArray]
-		print(self.textArray)
+		#print(self.textArray)
 
 	def getRaw(self):
+		if self.currentLine >= len(self.textArray):
+			return ""
 		if self.currentPos >= len(self.textArray[self.currentLine]):
 			self.currentPos = 0
 			self.currentLine += 1
