@@ -50,7 +50,7 @@ class TermExtractor(object):
 	#
 	def extract(self):
 		element = self.parser.get()
-		print("["+element+"]")
+		#print("["+element+"]")
 		#
 		#		Nothing
 		#

@@ -24,7 +24,7 @@ Sequence of alternating terms and operators.
 < = > #
 
 No precedence.
-Addresses are all byte addresses. However pling operates on words, e.g. a!4 = word at (a+8) a!b = word at (a+b+b)
+Addresses are all byte addresses. 
 
 L-Expression (value stored in DE if not constant)
 =================================================
@@ -43,14 +43,10 @@ for (<expression>) statement index local (defined if not present) counts down fr
 
 call <term>(<expr>,<expr>,<expr>...) exprs are stored in corresponding locals in parameters.
 
-call <term>.<identifier>(e1,e2) is syntactic sugar for call <type>_<term>(<identifier>,e1,e2)
-e.g. call s1.move(100,10) => sprite_move(s1,100,10) if s1 is defined as global s1[32] is sprite it's a faux OOP.
-though the 32 (memory allocated) should be a constant really.
-
-local <identifier> [is <type>]
-local <identifier>[<sane constant term>] [is <type>]
+local <identifier> 
+local <identifier>[<sane constant term>] 
 global <identifier> [is <type>]
-global <identifier>[<sane constant term>] [is <type>]
+global <identifier>[<sane constant term>]
 
 <sane constant term> is an amount of memory ; > 512 generates a warning ? this is the number of WORDS.
 variable will contain the address of the memory allocated.

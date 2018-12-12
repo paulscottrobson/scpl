@@ -98,6 +98,7 @@ class ElementParser(object):
 if __name__ == "__main__":
 	tas = TextArrayStream("""
 		$7FFE
+		locvar + 4 ;
 		"hello" 123 var.ident_1 >+< 'x' // comment
 		"world" $2A
 	
